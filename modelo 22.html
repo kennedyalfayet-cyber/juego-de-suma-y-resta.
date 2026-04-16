@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mates PRO Completo</title>
+
+<style>
+body{
+font-family:sans-serif;
+text-align:center;
+margin:0;
+transition:background 2s;
+}
+
+header{
+background:#ff6b6b;
+color:white;
+padding:25px;
+font-size:1.8rem;
+}
+
+/* PRACTICAS */
+.practicas{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:40px;
+padding:30px;
+}
+
+.box{
+background:white;
+padding:35px;
+border-radius:25px;
+box-shadow:0 10px 25px rgba(0,0,0,0.25);
+max-width:500px;
+width:100%;
+}
+
+.box span{
+font-size:3rem;
+}
+
+input{
+font-size:2.5rem;
+width:140px;
+text-align:center;
+}
+
+button{
+padding:15px 25px;
+margin:10px;
+border:none;
+border-radius:25px;
+background:#27ae60;
+color:white;
+cursor:pointer;
+font-size:1.2rem;
+}
+
+.btn-rojo{
+background:#e74c3c;
+}
+
+.correcto{color:green;font-weight:bold;font-size:1.4rem;}
+.incorrecto{color:red;font-weight:bold;font-size:1.4rem;}
+.rango{font-weight:bold;margin:10px;font-size:1.3rem;}
+
+#juego, #pro{
+max-width:600px;
+margin:30px auto;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🔥 Mates PRO Completo 🔥</h1>
+</header>
+
+<!-- PRACTICAS -->
+<div id="practicas" class="practicas">
+
+<div class="box">
+<h2>Suma</h2>
+<span id="s1"></span> + <span id="s2"></span><br>
+<input id="rs"><br>
+<button onclick="verSuma()">Responder</button>
+<div id="resSuma"></div>
+</div>
+
+<div class="box">
+<h2>Resta (sin negativos)</h2>
+<span id="r1"></span> - <span id="r2"></span><br>
+<input id="rr"><br>
+<button onclick="verResta()">Responder</button>
+<div id="resResta"></div>
+</div>
+
+</div>
+
+<div>
+<button onclick="iniciarJuego()">🎯 Juego 20 preguntas</button>
+<button onclick="iniciarPro()">🚀 Modo PRO</button>
+</div>
+
+<!-- JUEGO -->
+<div id="juego" class="box" style="display:none;">
+
+<h2>Juego de 20 preguntas</h2>
+<div>Pregunta <span id="nJ">1</span>/20</div>
+
+<div id="pregJ" style="font-size:2.5rem;"></div>
+<input id="respJ"><br>
+
+<button onclick="verJuego()">Comprobar</button>
+<button onclick="sigJuego()" id="sigJ" disabled>Siguiente</button>
+<button class="btn-rojo" onclick="volver()">Volver</button>
+
+<div id="resJ"></div>
+
+<div id="finJ" style="display:none;">
+<p id="puntJ"></p>
+<button onclick="iniciarJuego()">Reiniciar</button>
+</div>
+
+</div>
+
+<!-- PRO -->
+<div id="pro" class="box" style="display:none;">
+
+<h2>Modo PRO (Racha)</h2>
+<p>💥 Si fallas reinicias</p>
+
+<div>Pregunta <span id="nP">1</span></div>
+<div>Puntos: <span id="pts">0</span></div>
+<div>Récord: <span id="rec">0</span></div>
+
+<div class="rango" id="ran"></div>
+
+<div id="pregP" style="font-size:2.5rem;"></div>
+<input id="respP"><br>
+
+<button onclick="verPro()">Responder</button>
+<button onclick="sigPro()" id="sigP" disabled>Siguiente</button>
+
+<button class="btn-rojo" onclick="volver()">Volver</button>
+<button onclick="iniciarPro()">Reiniciar</button>
+
+<div id="resP"></div>
+
+</div>
+
+<script>
+
+/* FONDO */
+setInterval(()=>{
+document.body.style.background=
+`linear-gradient(45deg,hsl(${Math.random()*360},80%,70%),hsl(${Math.random()*360},80%,80%))`;
+},4000);
+
+/* PRACTICAS */
+function nuevaSuma(){
+let a=Math.floor(Math.random()*10)+1;
+let b=Math.floor(Math.random()*10)+1;
+s1.innerText=a; s2.innerText=b;
+window.rsok=a+b;
+rs.value="";
+}
+function verSuma(){
+let r=parseInt(rs.value);
+resSuma.innerHTML=r===rsok?"✔":"❌ "+rsok;
+setTimeout(nuevaSuma,1500);
+}
+
+/* 🔒 RESTA SIN NEGATIVOS */
+function nuevaResta(){
+let a=Math.floor(Math.random()*20)+5;
+let b=Math.floor(Math.random()*(a+1)); // garantiza NO negativo
+r1.innerText=a;
+r2.innerText=b;
+window.rrok=a-b;
+rr.value="";
+}
+function verResta(){
+let r=parseInt(rr.value);
+resResta.innerHTML=r===rrok?"✔":"❌ "+rrok;
+setTimeout(nuevaResta,1500);
+}
+
+/* JUEGO */
+let cj=0,pj=1,okJ;
+
+function genJ(){
+let a=Math.floor(Math.random()*15)+1;
+let b=Math.floor(Math.random()*15)+1;
+
+if(Math.random()>0.5){
+okJ=a+b;
+pregJ.innerText=`${a}+${b}`;
+}else{
+let big=Math.max(a,b);
+let small=Math.min(a,b);
+okJ=big-small;
+pregJ.innerText=`${big}-${small}`;
+}
+
+respJ.value="";
+resJ.innerHTML="";
+sigJ.disabled=true;
+}
+
+function iniciarJuego(){
+practicas.style.display="none";
+pro.style.display="none";
+juego.style.display="block";
+cj=0;pj=1;
+nJ.innerText=1;
+finJ.style.display="none";
+genJ();
+}
+
+function verJuego(){
+let r=parseInt(respJ.value);
+if(r===okJ){resJ.innerHTML="✔";cj++;}
+else resJ.innerHTML="❌ "+okJ;
+sigJ.disabled=false;
+}
+
+function sigJuego(){
+if(pj>=20){
+finJ.style.display="block";
+puntJ.innerText=`Puntaje: ${cj}/20`;
+return;
+}
+pj++;nJ.innerText=pj;
+genJ();
+}
+
+/* PRO */
+let puntos=0,racha=0,okP,record=localStorage.getItem("rec")||0,np=1;
+
+function rango(p){
+if(p<100)return "Principiante";
+if(p<200)return "Aprendiz";
+if(p<300)return "Intermedio";
+if(p<400)return "Avanzado";
+if(p<500)return "Experto";
+return "Matemático Ejemplar";
+}
+
+function genP(){
+let max=10+racha*3;
+let a=Math.floor(Math.random()*max)+1;
+let b=Math.floor(Math.random()*max)+1;
+
+if(Math.random()>0.5){
+okP=a+b;
+pregP.innerText=`${a}+${b}`;
+}else{
+let big=Math.max(a,b);
+let small=Math.min(a,b);
+okP=big-small;
+pregP.innerText=`${big}-${small}`;
+}
+
+respP.value="";
+resP.innerHTML="";
+sigP.disabled=true;
+}
+
+function iniciarPro(){
+practicas.style.display="none";
+juego.style.display="none";
+pro.style.display="block";
+
+puntos=0;racha=0;np=1;
+nP.innerText=1;
+rec.innerText=record;
+act();
+genP();
+}
+
+function act(){
+pts.innerText=puntos;
+ran.innerText="Rango: "+rango(puntos);
+}
+
+function verPro(){
+let r=parseInt(respP.value);
+
+if(r===okP){
+puntos+=20;racha++;
+resP.innerHTML="✔ bien +20";
+}else{
+resP.innerHTML="❌ era "+okP+" (reinicio)";
+puntos=0;
+racha=0;
+}
+
+if(puntos>record){
+record=puntos;
+localStorage.setItem("rec",record);
+}
+
+rec.innerText=record;
+act();
+sigP.disabled=false;
+}
+
+function sigPro(){
+np++;nP.innerText=np;
+genP();
+}
+
+/* VOLVER */
+function volver(){
+juego.style.display="none";
+pro.style.display="none";
+practicas.style.display="flex";
+}
+
+/* INIT */
+nuevaSuma();
+nuevaResta();
+
+</script>
+
+</body>
+</html>
